@@ -1,4 +1,6 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
+import "./aaa.scss";
+import { Button } from "antd";
 
 class Home extends Component {
     constructor() {
@@ -6,7 +8,12 @@ class Home extends Component {
         this.state = {};
     }
     render() {
-        return <div>Home</div>
+        return (
+            <Fragment>
+                Home
+                <Button>按钮</Button>
+            </Fragment>
+        )
     }
 }
 export default Home;
