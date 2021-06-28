@@ -12,6 +12,7 @@
     "@typescript-eslint/eslint-plugin": "^4.5.0",
     "@typescript-eslint/parser": "^4.5.0",
     "antd": "^4.16.5",
+    "axios": "^0.21.1",
     "babel-eslint": "^10.1.0",
     "babel-jest": "^26.6.0",
     "babel-loader": "8.1.0",
@@ -36,6 +37,7 @@
     "file-loader": "6.1.1",
     "fs-extra": "^9.0.1",
     "html-webpack-plugin": "4.5.0",
+    "http-proxy-middleware": "^2.0.0",
     "identity-obj-proxy": "3.0.0",
     "jest": "26.6.0",
     "jest-circus": "26.6.0",
@@ -72,7 +74,10 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js",
+    "build:dev": "dotenv -e .env.development react-app-rewired build",
+    "build:pro": "dotenv -e .env.production react-app-rewired build",
+    "build:test": "dotenv -e .env.test react-app-rewired build"
   },
   "eslintConfig": {
     "extends": [
