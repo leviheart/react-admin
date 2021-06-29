@@ -6,13 +6,17 @@ import { UserOutlined, UnlockOutlined } from '@ant-design/icons';
 import { validate_password } from "../../utils/validate"
 //API
 import { Login } from "../../api/account";
+//组件
+import Code from "../../components/code/index"
 
 class LoginForm extends Component {
     constructor() {
         super();
-        this.state = {};
+        this.state = {
+            username: ""
+        };
     }
-
+    //登录
     onFinish = (values) => {
         Login().then(response => {
             console.log("成功调用接口")
@@ -22,12 +26,23 @@ class LoginForm extends Component {
         console.log('Received values of form: ', values);
     }
 
+    /**
+    * input输入处理,e里面的target属性，就是输入框当前值,可以打印出来看是否接收到
+    */
+    inputChange = (e) => {
+        let value = e.target.value;
+        this.setState({
+            username: value
+        })
+    }
+
     toggleForm = () => {
         //子级组件通过点击，触发此方法，然后调用父级方法，传回值
         this.props.switchForm("register")
     }
 
     render() {
+        const { username } = this.state;
         return (
             <Fragment>
                 {/* 表头 */}
@@ -37,11 +52,7 @@ class LoginForm extends Component {
                 </div>
                 {/* 输入框 */}
                 <div className="form-content">
-                    <Form
-                        name="normal_login"
-                        className="login-form"
-                        initialValues={{ remember: true }}
-                        onFinish={this.onFinish}>
+                    <Form name="normal_login" className="login-form" initialValues={{ remember: true }} onFinish={this.onFinish}>
                         {/* 用户名输入框 */}
                         <Form.Item name="username" rules={
                             [
@@ -49,7 +60,7 @@ class LoginForm extends Component {
                                 { type: "email", message: "邮箱格式不正确" }
                             ]
                         }>
-                            <Input prefix={<UserOutlined className="site-form-item-icon" />} placeholder="email" />
+                            <Input value={username} onChange={this.inputChange} prefix={<UserOutlined className="site-form-item-icon" />} placeholder="email" />
                         </Form.Item>
                         {/* 密码输入框 */}
                         <Form.Item name="password" rules={
@@ -85,7 +96,7 @@ class LoginForm extends Component {
                                     <Input prefix={<UnlockOutlined className="site-form-item-icon" />} placeholder="Code" />
                                 </Col>
                                 <Col span={9}>
-                                    <Button type="danger">获取验证码</Button>
+                                    <Code username={username}></Code>
                                 </Col>
                             </Row>
                         </Form.Item>
