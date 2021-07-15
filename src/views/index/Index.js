@@ -4,8 +4,9 @@ import { Layout } from "antd";
 //样式
 import "./layout.scss"
 //layout组件
-import LayoutAside from "./components/aside";
-import LayoutHeader from "./components/header";
+import LayoutAside from "./components/Aside";
+import LayoutHeader from "./components/Header";
+import ContainerMain from "../../components/containerMain/Index";
 
 const { Sider, Header, Content } = Layout;
 class Index extends Component {
@@ -22,7 +23,9 @@ class Index extends Component {
                 <Header className="layout-header"><LayoutHeader></LayoutHeader></Header>
                 <Layout>
                     <Sider width="250px"><LayoutAside></LayoutAside></Sider>
-                    <Content className="layout-main">内容区</Content>
+                    <Content className="layout-main">
+                        <ContainerMain></ContainerMain>
+                    </Content>
                 </Layout>
             </Layout>
         )
