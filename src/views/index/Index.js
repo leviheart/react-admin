@@ -13,16 +13,27 @@ class Index extends Component {
     constructor(props) {
         super(props);
         this.state = {
-
+            collapsed: true
         };
+    }
+
+    componentDidMount() {
+        const collapsed = JSON.parse(sessionStorage.getItem("collapsed"));
+        this.setState({ collapsed });
+    }
+
+    toggleCollapsed = () => {
+        const collapsed = !this.state.collapsed
+        this.setState({ collapsed });
+        sessionStorage.setItem("collapsed", collapsed);
     }
 
     render() {
         return (
             <Layout className="layout-wrap">
-                <Header className="layout-header"><LayoutHeader></LayoutHeader></Header>
+                <Header className="layout-header"><LayoutHeader toggle={this.toggleCollapsed} collapsed={this.state.collapsed}></LayoutHeader></Header>
                 <Layout>
-                    <Sider width="250px"><LayoutAside></LayoutAside></Sider>
+                    <Sider width="250px" collapsed={this.state.collapsed}><LayoutAside></LayoutAside></Sider>
                     <Content className="layout-main">
                         <ContainerMain></ContainerMain>
                     </Content>
