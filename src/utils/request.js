@@ -1,5 +1,7 @@
 import axios from "axios";
 import { getToken, getUsername } from "./cookies";
+//ANTD
+import { message } from "antd";
 //第一步，创建实例
 const service = axios.create({
     baseURL: process.env.REACT_APP_API,
@@ -20,9 +22,17 @@ service.interceptors.request.use(function (config) {
 //第三步，响应拦截(响应头)
 service.interceptors.response.use(function (response) {
     //对响应数据做点什么
-    return response;
-}, function (error) {
+    const data = response.data;
+    if (data.resCode !== 0) { //resCode不成功
+        message.info(data.message);//全局错误拦截提示
+        return Promise.reject(response);
+    } else {
+        return response;
+    }
+
+}, function (error) {//http状态不为200
     //对响应错误做点什么
+    const data = error.request;
     return Promise.reject(error);
 });
 
