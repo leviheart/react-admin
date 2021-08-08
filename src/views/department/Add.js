@@ -8,6 +8,7 @@ class DepartmentAdd extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            loading: false,
             formLayout: {
                 labelCol: { span: 2 },
                 wrapperCol: { span: 22 }
@@ -16,17 +17,40 @@ class DepartmentAdd extends Component {
     }
 
     onSubmit = (value) => {
+        if (!value.name) {
+            message.error("部门名称不能为空");
+            return false;
+        }
+        if (!value.number || value.number === 0) {
+            message.error("人员数量不能为0");
+            return false;
+        }
+        if (!value.content) {
+            message.error("描述不能为空");
+            return false;
+        }
+        this.setState({
+            loading: true,
+        })
         console.log(value)
         DepartmentAddApi(value).then(response => {
             const data = response.data;
             message.info(data.message);
-            console.log(response)
+            this.setState({
+                loading: false,
+            })
+            //重置表单
+            this.refs.form.resetFields();
+        }).catch(error => {
+            this.setState({
+                loading: false,
+            })
         })
     }
 
     render() {
         return (
-            <Form onFinish={this.onSubmit} {...this.state.formLayout}>
+            <Form ref="form" onFinish={this.onSubmit} {...this.state.formLayout}>
                 <Form.Item label="部门名称" name="name">
                     <Input></Input>
                 </Form.Item>
@@ -43,7 +67,7 @@ class DepartmentAdd extends Component {
                     <Input.TextArea></Input.TextArea>
                 </Form.Item>
                 <Form.Item>
-                    <Button type="primary" htmlType="submit">确认</Button>
+                    <Button loading={this.state.loading} type="primary" htmlType="submit">确认</Button>
                 </Form.Item>
             </Form>
         )
@@ -56,3 +80,4 @@ export default DepartmentAdd;
 //按钮触发submit方法,es6 ... 扩展就是属性名里的所有都解析加进去,api文件夹下新建department.js文件
 //传的值的类型
 //17 10min labelCol表格栅格布局
+//17-1 20min 按钮添加loading
