@@ -9,6 +9,10 @@ class DepartmentList extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            //id
+            id: "",
+            //表格加载
+            loadingTable: false,
             //请求参数
             pageNumber: 1,
             pageSize: 10,
@@ -19,8 +23,6 @@ class DepartmentList extends Component {
             visible: false,
             //弹窗确定按钮 loading
             confirmLoading: false,
-            //id
-            id: "",
             //表头
             columns: [
                 { title: "部门名称", dataIndex: "name", key: "name" },
@@ -29,7 +31,7 @@ class DepartmentList extends Component {
                     dataIndex: "status",
                     key: "status",
                     render: (text, rowData) => {
-                        return <Switch onChange={() => this.onHandlerSwitch(rowData)} checkedChildren="启用" unCheckedChildren="禁用" defaultChecked={rowData.status === "1" ? true : false}></Switch>
+                        return <Switch onChange={() => this.onHandlerSwitch(rowData)} loading={rowData.id == this.state.id} checkedChildren="启用" unCheckedChildren="禁用" defaultChecked={rowData.status === "1" ? true : false}></Switch>
                     }
                 },
                 { title: "人员数量", dataIndex: "number", key: "number" },
@@ -73,19 +75,23 @@ class DepartmentList extends Component {
             requestData.name = keyWork;
         }
         GetList(requestData).then(response => {
+            this.setState({ loadingTable: true })
             const responseData = response.data.data; //数组
             if (responseData) {//返回一个null
                 this.setState({
                     data: responseData.data
                 })
             }
+            this.setState({ loadingTable: false })
         }).catch(error => {
             console.log(error)
+            this.setState({ loadingTable: false })
         })
     }
 
     /**搜索*/
     onFinish = (value) => {
+        if (this.state.loadingTable) { return false }
         this.setState({
             keyWork: value.name,
             pageNumberL: 1,
@@ -99,7 +105,10 @@ class DepartmentList extends Component {
      * 删除
      */
     onHandlerDelete(id) {
-        if (!id) { return false; }
+        if (!id) {//批量删除
+            if (this.state.selectedRowKeys.length === 0) { return false; }
+            id = this.state.selectedRowKeys.join();
+        }
         this.setState({
             visible: true,
             id
@@ -113,8 +122,12 @@ class DepartmentList extends Component {
             id: data.id,
             status: data.status === "1" ? false : true
         }
+        this.setState({ id: data.id })
         Status(requestData).then(response => {
             message.info(response.data.message);
+            this.setState({ id: "" })
+        }).catch(error => {
+            this.setState({ id: "" })
         })
     }
 
@@ -133,7 +146,8 @@ class DepartmentList extends Component {
             this.setState({
                 visible: false,
                 id: "",
-                confirmLoading: false
+                confirmLoading: false,
+                selectedRowKeys: []
             })
             //刷新页面，即再请求一次数据
             this.loadData();
@@ -141,7 +155,7 @@ class DepartmentList extends Component {
     }
 
     render() {
-        const { columns, data } = this.state;
+        const { columns, data, loadingTable } = this.state;
         const rowSelection = {
             onChange: this.onCheckebox
         }
@@ -156,7 +170,8 @@ class DepartmentList extends Component {
                     </Form.Item>
                 </Form>
                 <div className="table-wrap">
-                    <Table rowSelection={rowSelection} rowKey="id" columns={columns} dataSource={data} bordered></Table>
+                    <Table loading={loadingTable} rowSelection={rowSelection} rowKey="id" columns={columns} dataSource={data} bordered></Table>
+                    <Button onClick={() => this.onHandlerDelete()}>批量删除</Button>
                 </div>
                 <Modal
                     title="提示"

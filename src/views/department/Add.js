@@ -83,10 +83,14 @@ class DepartmentAdd extends Component {
 
     /**编辑信息 */
     onHandlerEdit = (value) => {
-        const requestData = value
+        const requestData = value;
         requestData.id = this.state.id;
         Edit(requestData).then(response => {
-
+            const data = response.data;
+            message.info(data.message)
+            this.setState({
+                loading: false
+            })
         }).catch(error => {
             this.setState({
                 loading: false
