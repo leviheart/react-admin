@@ -13,18 +13,12 @@ class DepartmentList extends Component {
         this.state = {
             //id
             id: "",
-            //表格加载
-            loadingTable: false,
+            //flag
+            flag: false,
             //请求参数
             pageNumber: 1,
             pageSize: 10,
             keyWork: "",
-            //复选框数据
-            selectedRowKeys: [],
-            //警告弹窗
-            visible: false,
-            //弹窗确定按钮 loading
-            confirmLoading: false,
             //表头
             tableConfig: {
                 url: "departmentList",
@@ -53,7 +47,7 @@ class DepartmentList extends Component {
                                     <Button type="primary">
                                         <Link to={{ pathname: '/index/department/add', state: { id: rowData.id } }}>编辑</Link>
                                     </Button>
-                                    <Button onClick={() => this.onHandlerDelete(rowData.id)}>删除</Button>
+                                    <Button onClick={() => this.delete(rowData.id)}>删除</Button>
                                 </div>
                             )
                         }
@@ -64,6 +58,15 @@ class DepartmentList extends Component {
             data: []
         };
     }
+    // 生命周期
+    componentDidMount() {
+    }
+
+    //获取子组件实例-不定名
+    getChildRef = (ref) => {
+        //存储子组件
+        this.tableComponent = ref;
+    }
 
     /**搜索*/
     onFinish = (value) => {
@@ -72,20 +75,6 @@ class DepartmentList extends Component {
             keyWork: value.name,
             pageNumberL: 1,
             pageSize: 10,
-        })
-    }
-
-    /**
-     * 删除
-     */
-    onHandlerDelete(id) {
-        if (!id) {//批量删除
-            if (this.state.selectedRowKeys.length === 0) { return false; }
-            id = this.state.selectedRowKeys.join();
-        }
-        this.setState({
-            visible: true,
-            id
         })
     }
 
@@ -107,25 +96,9 @@ class DepartmentList extends Component {
         })
     }
 
-    /**复选框 */
-    onCheckebox = (selectedRowKeys) => {
-        this.setState({ selectedRowKeys })
-    }
-
-    /**弹窗*/
-    modalThen = () => {
-        this.setState({
-            confirmLoading: true
-        })
-        Delete({ id: this.state.id }).then(response => {
-            message.info(response.data.message);
-            this.setState({
-                visible: false,
-                id: "",
-                confirmLoading: false,
-                selectedRowKeys: []
-            })
-        })
+    // 删除
+    delete = (id) => {
+        this.tableComponent.onHandlerDelete(id)
     }
 
     render() {
@@ -140,19 +113,9 @@ class DepartmentList extends Component {
                     </Form.Item>
                 </Form>
                 <div className="table-wrap">
-                    <TableComponent batchButton={true} config={this.state.tableConfig} />
+                    {/* 子组件 */}
+                    <TableComponent onRef={this.getChildRef} batchButton={true} config={this.state.tableConfig} />
                 </div>
-                <Modal
-                    title="提示"
-                    visible={this.state.visible}
-                    onOk={this.modalThen}
-                    onCancel={() => { this.setState({ visible: false }) }}
-                    okText="确认"
-                    cancelText="取消"
-                    confirmLoading={this.state.confirmLoading}
-                >
-                    <p className="text-center">确认删除此信息?<strong className="color-red">删除后将无法恢复</strong></p>
-                </Modal>
             </Fragment>
         )
     }
