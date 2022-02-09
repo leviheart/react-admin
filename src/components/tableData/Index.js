@@ -2,11 +2,11 @@ import React, {
 	Component, Fragment
 } from "react";
 import PropTypes from "prop-types";
-import { Col, Pagination, Row, Table, Button, message, Modal } from "antd";
+import { Form, Input, message, Modal, Button } from "antd";
 import { TableList, TableDelete } from "@api/common";
 //api
-import { Delete } from "@api/department";
 import requestUrl from "@api/requestUrl";
+import TableBasic from "./Table";
 class TableComponent extends Component {
 	constructor(props) {
 		super(props);
@@ -35,7 +35,7 @@ class TableComponent extends Component {
 
 	/**获取列表数据 */
 	loadData = () => {
-		const { pageNumber, pageSize } = this.state;
+		const { pageNumber, pageSize, keyWork } = this.state;
 		const requestData = {
 			url: requestUrl[this.props.config.url],
 			method: "post",
@@ -44,6 +44,8 @@ class TableComponent extends Component {
 				pageSize: pageSize,
 			}
 		}
+		//拼接搜索参数
+		if (keyWork) { requestData.data.name = keyWork; }
 		TableList(requestData).then(response => {
 			const responseData = response.data.data; //数组
 			if (responseData.data) {//返回一个null
@@ -83,6 +85,16 @@ class TableComponent extends Component {
 		}, () => {
 			this.loadData();
 		})
+	}
+
+	/**搜索*/
+	onFinish = (value) => {
+		this.setState({
+			keyWork: value.name,
+			pageNumberL: 1,
+			pageSize: 10,
+		})
+		this.loadData();
 	}
 
 	/**确认弹窗*/
@@ -130,7 +142,7 @@ class TableComponent extends Component {
 	}
 
 	render() {
-		const { loadingTable, data } = this.state;
+		const { loadingTable, data, total } = this.state;
 		const { thead, checkbox, rowkey } = this.props.config;
 		const rowSelection = {
 			onChange: this.onCheckebox
@@ -138,32 +150,27 @@ class TableComponent extends Component {
 		return (
 			//fragment包裹分页和table组件,vscode自动引入ant组件
 			<Fragment>
-				<Table
-					pagination={false}
-					loading={loadingTable}
-					rowKey={rowkey || "id"} //致命的K的大小写
-					rowSelection={checkbox ? rowSelection : null}
-					columns={thead}
-					dataSource={data}
-					bordered />
-				<div className="spacing-30"></div>
-				<Row>
-					<Col span={8}>
-						{/* 函数判断 */}
-						{this.props.batchButton && <Button onClick={() => this.onHandlerDelete()}>批量删除</Button>}
-					</Col>
-					<Col span={16}>
-						<Pagination
-							onChange={this.onChangeCurrnePage}
-							onShowSizeChange={this.onChangeSizePage}
-							className="pull-right"
-							total={this.state.total}
-							showSizeChanger
-							showQuickJumper
-							showTotal={total => `Total ${total} items`}
-						/>
-					</Col>
-				</Row>
+				{/* 筛选 */}
+				<Form layout="inline" onFinish={this.onFinish}>
+					<Form.Item label="部门名称" name="name">
+						<Input placeholder="请输入部门名称"></Input>
+					</Form.Item>
+					<Form.Item shouldUpdate={true}>
+						<Button type="primary" htmlType="submit">搜索</Button>
+					</Form.Item>
+				</Form>
+				{/* table UI组件 */}
+				<div className="table-wrap">
+					<TableBasic
+						columns={thead}
+						dataSource={data}
+						total={total}
+						changePageCurrent={this.onChangeCurrnePage}
+						changePageSize={this.onChangeSizePage}
+						handlerDelete={() => this.onHandlerDelete()}
+						rowSelection={checkbox ? rowSelection : null}
+						rowkey={rowkey}></TableBasic>
+				</div>
 				{/* 确认弹窗 */}
 				<Modal
 					title="提示"
@@ -192,3 +199,4 @@ TableComponent.defaultProps = {
 export default TableComponent;
 // 传递方式从this调用改成箭头函数传 函数要带() this指向问题
 //致命的K的大小写
+//容器组件,处理逻辑。UI组件负责显示
