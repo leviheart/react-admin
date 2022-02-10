@@ -3,6 +3,8 @@ import React, { Component } from "react";
 import { Form, Input, Button, InputNumber, Radio, message } from "antd";
 //API
 import { DepartmentAddApi, Detailed, Edit } from "../../api/department";
+//组件
+import FormCom from "../../components/form/Index";
 
 class DepartmentAdd extends Component {
     constructor(props) {
@@ -13,7 +15,15 @@ class DepartmentAdd extends Component {
             formLayout: {
                 labelCol: { span: 2 },
                 wrapperCol: { span: 22 }
-            }
+            },
+            formItem: [
+                {
+                    type: "Input", label: "部门名称", name: "name", required: true, rules: [{}, {}]
+                },
+                {
+                    type: "Select", label: "部门名称aaaaa", name: "namea", required: true, rules: [{}, {}]
+                }
+            ]
         };
     }
 
@@ -31,6 +41,7 @@ class DepartmentAdd extends Component {
 
     getDetailed = () => {
         if (!this.props.location.state) { return false }
+        //进入模块时,获取name之类的数据
         Detailed({ id: this.state.id }).then(response => {
             // const data = response.data.data;
             // this.refs.form.setFieldsValue({
@@ -100,27 +111,31 @@ class DepartmentAdd extends Component {
 
 
     render() {
+        const { formItem } = this.state
         return (
-            <Form ref="form" onFinish={this.onSubmit} {...this.state.formLayout}>
-                <Form.Item label="部门名称" name="name">
-                    <Input></Input>
-                </Form.Item>
-                <Form.Item label="人员数量" name="number">
-                    <InputNumber defaultValue={0} min={0} max={100}></InputNumber>
-                </Form.Item>
-                <Form.Item label="禁启用" name="status">
-                    <Radio.Group defaultValue={true}>
-                        <Radio value={false}>禁用</Radio>
-                        <Radio value={true}>启用</Radio>
-                    </Radio.Group>
-                </Form.Item>
-                <Form.Item label="描述" name="content">
-                    <Input.TextArea></Input.TextArea>
-                </Form.Item>
-                <Form.Item>
-                    <Button loading={this.state.loading} type="primary" htmlType="submit">确认</Button>
-                </Form.Item>
-            </Form>
+            <>
+                <FormCom formItem={formItem}></FormCom>
+                <Form ref="form" onFinish={this.onSubmit} initialValues={{ status: true, number: 0 }} {...this.state.formLayout}>
+                    <Form.Item label="部门名称" name="name">
+                        <Input></Input>
+                    </Form.Item>
+                    <Form.Item label="人员数量" name="number">
+                        <InputNumber defaultValue={0} min={0} max={100}></InputNumber>
+                    </Form.Item>
+                    <Form.Item label="禁启用" name="status">
+                        <Radio.Group defaultValue={true}>
+                            <Radio value={false}>禁用</Radio>
+                            <Radio value={true}>启用</Radio>
+                        </Radio.Group>
+                    </Form.Item>
+                    <Form.Item label="描述" name="content">
+                        <Input.TextArea></Input.TextArea>
+                    </Form.Item>
+                    <Form.Item>
+                        <Button loading={this.state.loading} type="primary" htmlType="submit">确认</Button>
+                    </Form.Item>
+                </Form>
+            </>
         )
     }
 }
