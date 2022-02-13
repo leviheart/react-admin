@@ -1,8 +1,8 @@
 import React, { Component } from "react";
 //ANTD
-import { Form, Input, Button, InputNumber, Radio, message } from "antd";
+import { message } from "antd";
 //API
-import { DepartmentAddApi, Detailed, Edit } from "../../api/department";
+import { Detailed, Edit } from "../../api/department";
 //组件
 import FormCom from "../../components/form/Index";
 
@@ -12,17 +12,42 @@ class DepartmentAdd extends Component {
         this.state = {
             loading: false,
             id: "",
+            formConfig: {
+                url: "departmentAdd"
+            },
             formLayout: {
                 labelCol: { span: 2 },
                 wrapperCol: { span: 22 }
             },
             formItem: [
                 {
-                    type: "Input", label: "部门名称", name: "name", required: true, rules: [{}, {}]
+                    type: "Input",
+                    label: "部门名称",
+                    name: "name",
+                    required: true,
+                    style: { width: "200px" },
+                    placeholder: "请输入部门名称"
                 },
                 {
-                    type: "Select", label: "部门名称aaaaa", name: "namea", required: true, rules: [{}, {}]
-                }
+                    type: "InputNumber",
+                    label: "人员数量",
+                    name: "number",
+                    required: true,
+                    min: 0,
+                    max: 100,
+                    style: { width: "200px" },
+                    placeholder: "请输入人员数量"
+                },
+                {
+                    type: "Radio",
+                    label: "禁启用",
+                    name: "state",
+                    required: true,
+                    options: [
+                        { label: "禁用", value: false },
+                        { label: "启用", value: true }
+                    ]
+                },
             ]
         };
     }
@@ -54,44 +79,6 @@ class DepartmentAdd extends Component {
         })
     }
 
-    onSubmit = (value) => {
-        if (!value.name) {
-            message.error("部门名称不能为空");
-            return false;
-        }
-        if (!value.number || value.number === 0) {
-            message.error("人员数量不能为0");
-            return false;
-        }
-        if (!value.content) {
-            message.error("描述不能为空");
-            return false;
-        }
-        this.setState({
-            loading: true,
-        })
-        //确定按钮执行添加或编辑
-        this.state.id ? this.onHandlerEdit(value) : this.onHandlerAdd(value);
-    }
-
-    /**添加信息 */
-    onHandlerAdd = (value) => {
-        DepartmentAddApi(value).then(response => {
-            const data = response.data;
-            message.info(data.message);
-            this.setState({
-                loading: false,
-            })
-            //重置表单
-            this.refs.form.resetFields();
-        }).catch(error => {
-            this.setState({
-                loading: false,
-            })
-        })
-
-    }
-
     /**编辑信息 */
     onHandlerEdit = (value) => {
         const requestData = value;
@@ -111,30 +98,10 @@ class DepartmentAdd extends Component {
 
 
     render() {
-        const { formItem } = this.state
+        const { formItem, formLayout, formConfig } = this.state
         return (
             <>
-                <FormCom formItem={formItem}></FormCom>
-                <Form ref="form" onFinish={this.onSubmit} initialValues={{ status: true, number: 0 }} {...this.state.formLayout}>
-                    <Form.Item label="部门名称" name="name">
-                        <Input></Input>
-                    </Form.Item>
-                    <Form.Item label="人员数量" name="number">
-                        <InputNumber defaultValue={0} min={0} max={100}></InputNumber>
-                    </Form.Item>
-                    <Form.Item label="禁启用" name="status">
-                        <Radio.Group defaultValue={true}>
-                            <Radio value={false}>禁用</Radio>
-                            <Radio value={true}>启用</Radio>
-                        </Radio.Group>
-                    </Form.Item>
-                    <Form.Item label="描述" name="content">
-                        <Input.TextArea></Input.TextArea>
-                    </Form.Item>
-                    <Form.Item>
-                        <Button loading={this.state.loading} type="primary" htmlType="submit">确认</Button>
-                    </Form.Item>
-                </Form>
+                <FormCom formItem={formItem} formLayout={formLayout} onSubmit={this.onSubmit} formConfig={formConfig}></FormCom>
             </>
         )
     }
