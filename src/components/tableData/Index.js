@@ -30,7 +30,7 @@ class TableComponent extends Component {
 	componentDidMount() {
 		this.loadData();
 		// 返回子组件实例
-		this.props.onRef(this);
+		this.props.onRef(this); //子组件调用父组件方法，并把子组件实例传回给父组件
 	}
 
 	/**获取列表数据 */

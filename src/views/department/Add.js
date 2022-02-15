@@ -2,7 +2,7 @@ import React, { Component } from "react";
 //ANTD
 import { message } from "antd";
 //API
-import { Detailed, Edit } from "../../api/department";
+import { Add, Detailed, Edit } from "../../api/department";
 //组件
 import FormCom from "../../components/form/Index";
 
@@ -13,7 +13,12 @@ class DepartmentAdd extends Component {
             loading: false,
             id: "",
             formConfig: {
-                url: "departmentAdd"
+                url: "departmentAdd",
+                initValue: {
+                    status: true,
+                    number: 20
+                },
+                setFieldValue: {}
             },
             formLayout: {
                 labelCol: { span: 2 },
@@ -41,12 +46,19 @@ class DepartmentAdd extends Component {
                 {
                     type: "Radio",
                     label: "禁启用",
-                    name: "state",
+                    name: "status",
                     required: true,
                     options: [
                         { label: "禁用", value: false },
                         { label: "启用", value: true }
                     ]
+                },
+                {
+                    type: "Input",
+                    label: "描述",
+                    name: "content",
+                    required: true,
+                    placeholder: "请输入描述内容"
                 },
             ]
         };
@@ -68,14 +80,13 @@ class DepartmentAdd extends Component {
         if (!this.props.location.state) { return false }
         //进入模块时,获取name之类的数据
         Detailed({ id: this.state.id }).then(response => {
-            // const data = response.data.data;
-            // this.refs.form.setFieldsValue({
-            //     content: "",
-            //     name: "",
-            //     number: "",
-            //     status: true
-            // })
-            this.refs.form.setFieldsValue(response.data.data);
+            //编辑转添加,获取当前数据
+            this.setState({
+                formConfig: {
+                    ...this.state.formConfig,
+                    setFieldValue: response.data.data
+                }
+            })
         })
     }
 
@@ -96,12 +107,36 @@ class DepartmentAdd extends Component {
         })
     }
 
+    /**添加信息 */
+    onHandlerAdd = (value) => {
+        const requestData = value;
+        requestData.id = this.state.id;
+        Add(requestData).then(response => {
+            const data = response.data;
+            message.info(data.message)
+            this.setState({
+                loading: false
+            })
+        }).catch(error => {
+            this.setState({
+                loading: false
+            })
+        })
+    }
+
+    // 提交表单
+    onHandlerSubmit = (value) => {
+        console.log(value)
+        // 根据id判断添加还是编辑
+        this.state.id ? this.onHandlerEdit(value) : this.onHandlerAdd(value);
+    }
+
 
     render() {
         const { formItem, formLayout, formConfig } = this.state
         return (
             <>
-                <FormCom formItem={formItem} formLayout={formLayout} onSubmit={this.onSubmit} formConfig={formConfig}></FormCom>
+                <FormCom formItem={formItem} formLayout={formLayout} onSubmit={this.onSubmit} formConfig={formConfig} submit={this.onHandlerSubmit}></FormCom>
             </>
         )
     }
@@ -114,3 +149,4 @@ export default DepartmentAdd;
 //传的值的类型
 //17 10min labelCol表格栅格布局
 //17-1 20min 按钮添加loading
+//2022-2-16 添加失败,是因为接口字段没对上,必要的必须满足
