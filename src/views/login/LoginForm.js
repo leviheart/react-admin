@@ -2,7 +2,7 @@ import React, { Component, Fragment } from "react";
 //路由白名单
 import { withRouter } from 'react-router-dom';
 //ANTD
-import { Form, Input, Button, Row, Col, message } from 'antd';
+import { Form, Input, Button, Row, Col } from 'antd';
 import { UserOutlined, UnlockOutlined } from '@ant-design/icons';
 //验证
 import { validate_password } from "../../utils/validate"

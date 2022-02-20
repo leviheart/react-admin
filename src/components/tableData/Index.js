@@ -2,11 +2,13 @@ import React, {
 	Component, Fragment
 } from "react";
 import PropTypes from "prop-types";
-import { Form, Input, message, Modal, Button } from "antd";
+import { message, Modal } from "antd";
 import { TableList, TableDelete } from "@api/common";
 //api
 import requestUrl from "@api/requestUrl";
 import TableBasic from "./Table";
+import FormSearch from "../formSearch/Index";
+
 class TableComponent extends Component {
 	constructor(props) {
 		super(props);
@@ -14,7 +16,7 @@ class TableComponent extends Component {
 			//请求参数
 			pageNumber: 1,
 			pageSize: 10,
-			keyWork: "",
+			searchData: {},
 			//数据
 			data: [],
 			loadingTable: false,
@@ -35,7 +37,7 @@ class TableComponent extends Component {
 
 	/**获取列表数据 */
 	loadData = () => {
-		const { pageNumber, pageSize, keyWork } = this.state;
+		const { pageNumber, pageSize, searchData } = this.state;
 		const requestData = {
 			url: requestUrl[this.props.config.url],
 			method: "post",
@@ -44,8 +46,16 @@ class TableComponent extends Component {
 				pageSize: pageSize,
 			}
 		}
-		//拼接搜索参数
-		if (keyWork) { requestData.data.name = keyWork; }
+		//筛选项参数拼接
+		if (Object.keys(searchData).length !== 0) {
+			for (let key in searchData) {
+				requestData.data[key] = searchData[key]
+			}
+		}
+		// if (JSON.stringify(searchData) !== "{}") {
+		// 	console.log(searchData)
+		// }
+		//请求接口
 		TableList(requestData).then(response => {
 			const responseData = response.data.data; //数组
 			if (responseData.data) {//返回一个null
@@ -87,16 +97,6 @@ class TableComponent extends Component {
 		})
 	}
 
-	/**搜索*/
-	onFinish = (value) => {
-		this.setState({
-			keyWork: value.name,
-			pageNumberL: 1,
-			pageSize: 10,
-		})
-		this.loadData();
-	}
-
 	/**确认弹窗*/
 	modalThen = () => {
 		// 判断是否有已经选择的数据
@@ -127,6 +127,16 @@ class TableComponent extends Component {
 		})
 	}
 
+	search = (searchData) => {
+		this.setState({
+			pageNumber: 1,
+			pageSize: 10,
+			searchData
+		}, () => {
+			this.loadData();
+		})
+	}
+
 	/**
 	 * 删除
 	 */
@@ -142,8 +152,8 @@ class TableComponent extends Component {
 	}
 
 	render() {
-		const { loadingTable, data, total } = this.state;
-		const { thead, checkbox, rowkey } = this.props.config;
+		const { loadingTable, data, total, searchData } = this.state;
+		const { thead, checkbox, rowkey, formItem } = this.props.config;
 		const rowSelection = {
 			onChange: this.onCheckebox
 		}
@@ -151,14 +161,7 @@ class TableComponent extends Component {
 			//fragment包裹分页和table组件,vscode自动引入ant组件
 			<Fragment>
 				{/* 筛选 */}
-				<Form layout="inline" onFinish={this.onFinish}>
-					<Form.Item label="部门名称" name="name">
-						<Input placeholder="请输入部门名称"></Input>
-					</Form.Item>
-					<Form.Item shouldUpdate={true}>
-						<Button type="primary" htmlType="submit">搜索</Button>
-					</Form.Item>
-				</Form>
+				<FormSearch formItem={formItem} search={this.search}></FormSearch>
 				{/* table UI组件 */}
 				<div className="table-wrap">
 					<TableBasic
